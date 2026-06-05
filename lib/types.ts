@@ -38,10 +38,14 @@ export interface PsychoType {
   title: string;
   /** キャッチコピー。 */
   catch: string;
-  /** 紹介文（エンタメ用）。 */
+  /** 紹介文（エンタメ用・短文）。 */
   description: string;
+  /** 長文の鑑定文（任意）。設定されていれば結果ページで章立て表示する。 */
+  reading?: string;
   /** 強み・特徴の箇条書き。 */
   traits: string[];
   /** 画像ファイル名（public/images/types/ 配下）。なければ絵文字で代替。 */
   image: string;
+  /** 立ち絵ファイル名（public/images/types/tatie/ 配下）。なければ非表示。 */
+  tatie?: string;
 }

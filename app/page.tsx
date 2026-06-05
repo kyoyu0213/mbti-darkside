@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { site } from "@/lib/site";
 import { Disclaimer } from "@/components/Disclaimer";
 import { psychoTypes, allMbtiCodes } from "@/data/types";
@@ -10,6 +11,23 @@ export default function HomePage() {
       <p className="mb-4 font-[var(--font-cinzel)] tracking-[0.4em] text-xs text-gold/70">
         FORBIDDEN ARCHIVE
       </p>
+
+      <div className="relative mb-8 w-full max-w-2xl">
+        <Image
+          src="/images/Top.png"
+          alt={site.name}
+          width={1536}
+          height={1024}
+          priority
+          className="w-full rounded-2xl border border-gold/30 shadow-arcane"
+        />
+        {/* 画像内「闇人格を診断する」ボタンに重ねた透明リンク */}
+        <Link
+          href="/quiz"
+          aria-label="闇人格を診断する"
+          className="absolute left-[31%] top-[74%] h-[13%] w-[38%]"
+        />
+      </div>
 
       <h1 className="animate-flicker text-4xl font-bold leading-tight sm:text-6xl">
         <span className="text-gold-gradient drop-shadow-[0_0_25px_rgba(212,175,55,0.25)]">

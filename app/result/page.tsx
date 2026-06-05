@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getPsychoType, isValidCode } from "@/lib/diagnose";
 import { site } from "@/lib/site";
 import { TypeImage } from "@/components/TypeImage";
+import { TypeArt } from "@/components/TypeArt";
 import { ShareButton } from "@/components/ShareButton";
 import { Disclaimer } from "@/components/Disclaimer";
 
@@ -33,11 +34,15 @@ export function generateMetadata({
 }): Metadata {
   const t = getPsychoType(resolveCode(searchParams));
   const title = `${t.emoji} ${t.title}（${t.mbti}）`;
+  // シェア用画像（kekka フォルダ。ファイル名は立ち絵と共通）。
+  const images = t.tatie
+    ? [{ url: `/images/types/kekka/${t.tatie}`, alt: t.title }]
+    : undefined;
   return {
     title,
     description: `${t.catch} ── ${site.name}の診断結果。`,
-    openGraph: { title: `${title} | ${site.name}`, description: t.catch },
-    twitter: { card: "summary_large_image", title, description: t.catch },
+    openGraph: { title: `${title} | ${site.name}`, description: t.catch, images },
+    twitter: { card: "summary_large_image", title, description: t.catch, images },
   };
 }
 
@@ -56,11 +61,13 @@ export default function ResultPage({
         YOUR VERDICT
       </p>
 
-      {/* タイプ画像 / 絵文字 */}
-      <TypeImage image={t.image} emoji={t.emoji} alt={t.title} size={170} />
+      {/* タイプ画像（立ち絵があれば絵文字アバターは省略） */}
+      {!t.tatie && (
+        <TypeImage image={t.image} emoji={t.emoji} alt={t.title} size={170} />
+      )}
 
       {/* 称号 */}
-      <h1 className="mt-7 text-3xl font-bold sm:text-5xl">
+      <h1 className={`text-3xl font-bold sm:text-5xl ${t.tatie ? "mt-2" : "mt-7"}`}>
         <span className="text-gold-gradient drop-shadow-[0_0_25px_rgba(212,175,55,0.3)]">
           {t.emoji} {t.title}
         </span>
@@ -74,13 +81,50 @@ export default function ResultPage({
         </span>
       </div>
 
+      {/* 立ち絵 */}
+      {t.tatie && <TypeArt file={t.tatie} alt={t.title} />}
+
       {/* キャッチコピー */}
       <p className="mt-6 text-lg italic text-violet-100/90">「{t.catch}」</p>
 
-      {/* 紹介文 */}
-      <p className="mt-5 max-w-xl text-sm leading-loose text-violet-200/80">
-        {t.description}
-      </p>
+      {/* 紹介文 / 鑑定文 */}
+      {t.reading ? (
+        <div className="mt-6 w-full max-w-xl space-y-3 text-center text-sm leading-loose text-violet-200/85">
+          {t.reading.split("\n").map((line, i) => {
+            const text = line.trim();
+            if (text === "") return null;
+            if (text.startsWith("■")) {
+              return (
+                <h2
+                  key={i}
+                  className="!mt-8 border-b border-gold/20 pb-1 text-center font-semibold tracking-wide text-goldLight"
+                >
+                  {text.replace(/^■\s*/, "")}
+                </h2>
+              );
+            }
+            if (/^[★☆]/.test(text) || text.includes("：★") || text.includes("：☆")) {
+              return (
+                <p key={i} className="text-center tracking-[0.15em] text-gold">
+                  {text}
+                </p>
+              );
+            }
+            if (text.startsWith("「") && text.endsWith("」")) {
+              return (
+                <p key={i} className="text-center italic text-violet-100/90">
+                  {text}
+                </p>
+              );
+            }
+            return <p key={i}>{text}</p>;
+          })}
+        </div>
+      ) : (
+        <p className="mt-5 max-w-xl text-sm leading-loose text-violet-200/80">
+          {t.description}
+        </p>
+      )}
 
       {/* 4軸の内訳 */}
       <div className="mt-8 grid w-full max-w-md grid-cols-4 gap-2">
@@ -125,6 +169,7 @@ export default function ResultPage({
         emoji={t.emoji}
         mbti={t.mbti}
         siteName={site.name}
+        imageUrl={t.tatie ? `/images/types/kekka/${t.tatie}` : undefined}
       />
 
       {/* 再診断・トップ */}
