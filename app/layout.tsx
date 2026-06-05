@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cinzel, Noto_Serif_JP } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -43,7 +44,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ja" className={`${cinzel.variable} ${notoSerif.variable}`}>
-      <body className="font-gothic antialiased">{children}</body>
+      <body className="font-gothic antialiased">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
