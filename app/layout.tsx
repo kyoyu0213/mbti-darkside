@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cinzel, Noto_Serif_JP } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { site } from "@/lib/site";
+import { PromoLinks } from "@/components/PromoLinks";
 import "./globals.css";
 
 // ゴシックな雰囲気のラテン見出しフォント。
@@ -46,6 +47,7 @@ export default function RootLayout({
     <html lang="ja" className={`${cinzel.variable} ${notoSerif.variable}`}>
       <body className="font-gothic antialiased">
         {children}
+        <PromoLinks />
         <Analytics />
       </body>
     </html>
