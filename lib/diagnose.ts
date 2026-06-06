@@ -37,7 +37,7 @@ export function diagnose(answers: (Pole | null)[]): MbtiCode {
   return code;
 }
 
-/** MBTIコードからサイコパスタイプを取得。未知のコードは INTJ にフォールバック。 */
+/** MBTIコードからダークサイドタイプを取得。未知のコードは INTJ にフォールバック。 */
 export function getPsychoType(code: MbtiCode) {
   return psychoTypes[code] ?? psychoTypes["INTJ"];
 }

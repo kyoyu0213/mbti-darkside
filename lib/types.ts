@@ -28,13 +28,13 @@ export interface Question {
   choices: [Choice, Choice];
 }
 
-/** サイコパスMBTIタイプ1件分の表示データ。 */
+/** MBTIダークサイドタイプ1件分の表示データ。 */
 export interface PsychoType {
   /** 対応する本来のMBTIコード。 */
   mbti: MbtiCode;
   /** プレースホルダー用の絵文字。 */
   emoji: string;
-  /** サイコパス称号（タイプ名）。 */
+  /** ダークサイド称号（タイプ名）。 */
   title: string;
   /** キャッチコピー。 */
   catch: string;

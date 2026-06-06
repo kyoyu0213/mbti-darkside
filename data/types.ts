@@ -1,7 +1,7 @@
 import type { MbtiCode, PsychoType } from "@/lib/types";
 
 /**
- * 16タイプの「サイコパスMBTI」データ。
+ * 16タイプの「MBTIダークサイド」データ。
  * すべてエンタメ目的の創作設定。医学的・心理学的な診断ではない。
  * 画像は public/images/types/<mbti>.png を置けば自動で使われる（なければ絵文字表示）。
  */

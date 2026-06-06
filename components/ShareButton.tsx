@@ -22,7 +22,7 @@ export function ShareButton({
 }) {
   const [copied, setCopied] = useState(false);
 
-  const shareText = `私のサイコパスMBTIは「${emoji} ${title}（${mbti}）」でした。\nあなたの内なる闇は?\n\n#${siteName.replace(/\s/g, "")} #サイコパスMBTI診断`;
+  const shareText = `私のMBTIダークサイドは「${emoji} ${title}（${mbti}）」でした。\nあなたの内なる闇は?\n\n#${siteName.replace(/\s/g, "")} #MBTIダークサイド診断`;
 
   function openXIntent(url: string) {
     const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(

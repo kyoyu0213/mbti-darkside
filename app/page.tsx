@@ -21,10 +21,10 @@ export default function HomePage() {
           priority
           className="w-full rounded-2xl border border-gold/30 shadow-arcane"
         />
-        {/* 画像内「闇人格を診断する」ボタンに重ねた透明リンク */}
+        {/* 画像内「ダークサイドを診断する」ボタンに重ねた透明リンク */}
         <Link
           href="/quiz"
-          aria-label="闇人格を診断する"
+          aria-label="ダークサイドを診断する"
           className="absolute left-[31%] top-[74%] h-[13%] w-[38%]"
         />
       </div>
@@ -40,7 +40,7 @@ export default function HomePage() {
       <p className="mt-6 max-w-xl text-sm leading-relaxed text-violet-200/70">
         古城の最奥、封じられた禁書庫。
         頁をめくる者の心の奥を、20の問いが暴いていく――。
-        あなたはどの闇を宿す者なのか。16のサイコパスタイプから、その正体を診断します。
+        あなたはどの闇を宿す者なのか。16のダークサイドタイプから、その正体を診断します。
       </p>
 
       {/* CTA */}
