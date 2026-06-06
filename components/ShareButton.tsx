@@ -3,8 +3,8 @@
 import { useState } from "react";
 
 /**
- * X（旧Twitter）へのシェアボタンと、結果URLのコピー機能。
- * クライアント側で現在のURLを取得してシェア文面を組み立てる。
+ * X（旧Twitter）へのシェア・結果画像のダウンロード・結果リンクのコピー。
+ * クライアント側で短い結果URL（回答パラメータを含まない）を組み立てて共有する。
  */
 export function ShareButton({
   title,
@@ -17,89 +17,94 @@ export function ShareButton({
   emoji: string;
   mbti: string;
   siteName: string;
-  /** kekka フォルダのシェア用画像パス（任意）。対応端末では画像を添付して共有する。 */
+  /** kekka フォルダの結果画像パス（任意）。ダウンロードボタンで利用する。 */
   imageUrl?: string;
 }) {
   const [copied, setCopied] = useState(false);
 
-  const shareText = `私のMBTIダークサイドは「${emoji} ${title}（${mbti}）」でした。\nあなたの内なる闇は?\n\n#${siteName.replace(/\s/g, "")} #MBTIダークサイド診断`;
+  // ハッシュタグはサイト名から1つだけ生成（重複させない）。
+  const hashtag = `#${siteName.replace(/\s/g, "")}`;
 
-  function openXIntent(url: string) {
-    const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-      shareText
-    )}&url=${encodeURIComponent(url)}`;
-    window.open(intent, "_blank", "noopener,noreferrer");
+  /** 回答パラメータ a を含まない、結果タイプのみの短いURL。 */
+  function buildShareUrl(): string {
+    return `${window.location.origin}/result?mbti=${mbti}`;
   }
 
-  // スマホ等で画像ファイル添付の共有が使えるか（File対応を空ファイルで判定）。
-  function canShareImage(): boolean {
-    if (!imageUrl || typeof navigator === "undefined" || !navigator.canShare) {
-      return false;
-    }
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
-    if (!isMobile) return false;
-    try {
-      return navigator.canShare({
-        files: [new File([], "p.png", { type: "image/png" })],
-      });
-    } catch {
-      return false;
-    }
+  /** Xシェア用の本文（末尾に短い結果URLを含める）。 */
+  function buildShareText(shareUrl: string): string {
+    return `私のMBTIダークサイドは「${emoji} ${title}（${mbti}）」でした。\nあなたがダークサイドに堕ちたら？\n\n${hashtag}\n${shareUrl}`;
   }
 
   function share() {
-    const url = window.location.href;
-
-    // スマホ（画像添付対応）はネイティブ共有で画像を添付。
-    if (canShareImage()) {
-      shareWithImage(url);
-      return;
-    }
-
-    // PC等は同期的にXの投稿画面を開く（画像はOGPカードで表示）。
-    openXIntent(url);
+    const shareUrl = buildShareUrl();
+    // 本文に短いURLを含めるため、url パラメータは付けない（重複・冗長化を避ける）。
+    const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+      buildShareText(shareUrl)
+    )}`;
+    window.open(intent, "_blank", "noopener,noreferrer");
   }
 
-  async function shareWithImage(url: string) {
+  /** kekka 画像のファイル名から拡張子を除いた英語スラッグ。 */
+  function imageSlug(): string {
+    const base = imageUrl?.split("/").pop() ?? "";
+    return base.replace(/\.[^.]+$/, "");
+  }
+
+  async function downloadImage() {
+    if (!imageUrl) return;
+    const fileName = `result-${mbti}-${imageSlug()}.png`;
     try {
-      const res = await fetch(imageUrl!);
+      const res = await fetch(imageUrl);
       const blob = await res.blob();
-      const file = new File([blob], imageUrl!.split("/").pop() ?? "result.png", {
-        type: blob.type || "image/png",
-      });
-      await navigator.share({ files: [file], text: shareText, url });
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
     } catch {
-      // 失敗・キャンセル時はXの投稿画面へ（同一タブ遷移でブロック回避）。
-      const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        shareText
-      )}&url=${encodeURIComponent(url)}`;
-      window.location.href = intent;
+      // 失敗時は画像を新しいタブで開き、長押し保存に委ねる。
+      window.open(imageUrl, "_blank", "noopener,noreferrer");
     }
   }
 
-  async function copyLink() {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      setCopied(false);
-    }
+  function copyLink() {
+    // コピーするリンクも短い結果URLに統一する。
+    const shareUrl = buildShareUrl();
+    navigator.clipboard
+      .writeText(shareUrl)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1800);
+      })
+      .catch(() => setCopied(false));
   }
 
   return (
-    <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+    <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
       <button
         onClick={share}
-        className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gradient-to-b from-royal/80 to-abyss px-7 py-3 font-semibold text-goldLight shadow-arcane transition hover:scale-[1.03] hover:border-gold hover:shadow-gold"
+        className="inline-flex items-center justify-center gap-2 rounded-full border border-gold/40 bg-gradient-to-b from-royal/80 to-abyss px-7 py-3.5 font-semibold text-goldLight shadow-arcane transition hover:scale-[1.03] hover:border-gold hover:shadow-gold"
       >
         <span aria-hidden className="text-lg font-bold">𝕏</span>
         結果をシェアする
       </button>
 
+      {imageUrl && (
+        <button
+          onClick={downloadImage}
+          className="inline-flex items-center justify-center gap-2 rounded-full border border-gold/40 bg-gradient-to-b from-royal/80 to-abyss px-7 py-3.5 font-semibold text-goldLight shadow-arcane transition hover:scale-[1.03] hover:border-gold hover:shadow-gold"
+        >
+          <span aria-hidden className="text-lg">⬇</span>
+          結果画像をダウンロード
+        </button>
+      )}
+
       <button
         onClick={copyLink}
-        className="inline-flex items-center gap-2 rounded-full border border-arcane/30 px-6 py-3 text-sm text-violet-100/80 transition hover:border-arcane hover:text-goldLight"
+        className="inline-flex items-center justify-center gap-2 rounded-full border border-arcane/30 px-6 py-3.5 text-sm text-violet-100/80 transition hover:border-arcane hover:text-goldLight"
       >
         {copied ? "✓ コピーしました" : "🔗 結果リンクをコピー"}
       </button>
